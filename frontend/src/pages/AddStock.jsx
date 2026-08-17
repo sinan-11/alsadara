@@ -84,6 +84,7 @@ const AddStock = () => {
                 value={formData.brand}
                 onChange={handleChange}
                 required
+                autoComplete="off"
                 placeholder=""
                 className="input-field"
               />
@@ -96,6 +97,7 @@ const AddStock = () => {
                 value={formData.model}
                 onChange={handleChange}
                 required
+                autoComplete="off"
                 placeholder=""
                 className="input-field"
               />
@@ -108,6 +110,7 @@ const AddStock = () => {
                   name="ram"
                   value={formData.ram}
                   onChange={handleChange}
+                  autoComplete="off"
                   placeholder=""
                   className="input-field"
                 />
@@ -119,6 +122,7 @@ const AddStock = () => {
                   name="storage"
                   value={formData.storage}
                   onChange={handleChange}
+                  autoComplete="off"
                   placeholder=""
                   className="input-field"
                 />
@@ -130,6 +134,7 @@ const AddStock = () => {
                   name="color"
                   value={formData.color}
                   onChange={handleChange}
+                  autoComplete="off"
                   placeholder=""
                   className="input-field"
                 />

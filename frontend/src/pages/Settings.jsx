@@ -93,7 +93,7 @@ const Settings = () => {
         <form onSubmit={handleUpdateProfile} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Name</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" />
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" className="input-field" />
           </div>
 
           <div className="border-t border-gray-100 pt-4">
@@ -102,15 +102,15 @@ const Settings = () => {
 
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Current Password</label>
-            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="input-field" />
+            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} autoComplete="new-password" className="input-field" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">New Password</label>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input-field" />
+            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" className="input-field" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Confirm New Password</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input-field" />
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" className="input-field" />
           </div>
 
           <button type="submit" disabled={saving} className="btn-primary flex items-center justify-center gap-2">

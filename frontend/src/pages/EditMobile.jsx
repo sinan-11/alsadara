@@ -79,29 +79,29 @@ const EditMobile = () => {
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">Brand *</label>
-              <input type="text" name="brand" value={formData.brand} onChange={handleChange} required className="input-field" />
+              <input type="text" name="brand" value={formData.brand} onChange={handleChange} required autoComplete="off" className="input-field" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">Model *</label>
-              <input type="text" name="model" value={formData.model} onChange={handleChange} required className="input-field" />
+              <input type="text" name="model" value={formData.model} onChange={handleChange} required autoComplete="off" className="input-field" />
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">RAM</label>
-                <input type="text" name="ram" value={formData.ram} onChange={handleChange} className="input-field" />
+                <input type="text" name="ram" value={formData.ram} onChange={handleChange} autoComplete="off" className="input-field" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">Storage</label>
-                <input type="text" name="storage" value={formData.storage} onChange={handleChange} className="input-field" />
+                <input type="text" name="storage" value={formData.storage} onChange={handleChange} autoComplete="off" className="input-field" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">Color</label>
-                <input type="text" name="color" value={formData.color} onChange={handleChange} className="input-field" />
+                <input type="text" name="color" value={formData.color} onChange={handleChange} autoComplete="off" className="input-field" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">Status</label>
-              <select name="status" value={formData.status} onChange={handleChange} className="input-field">
+              <select name="status" value={formData.status} onChange={handleChange} autoComplete="off" className="input-field">
                 <option value="AVAILABLE">Available</option>
                 <option value="SOLD">Sold</option>
               </select>
