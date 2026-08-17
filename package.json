@@ -4,7 +4,7 @@
   "description": "Mobile Store Stock Management System",
   "scripts": {
     "start": "node backend/src/server.js",
-    "build": "cd backend && npm install && cd ../frontend && npm install && npm run build",
+    "build": "cd backend && npm install && cd ../frontend && npm install --include=dev && npm run build",
     "dev": "cd backend && npm run dev"
   }
 }
