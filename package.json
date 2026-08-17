@@ -1,0 +1,10 @@
+{
+  "name": "alsadara",
+  "version": "1.0.0",
+  "description": "Mobile Store Stock Management System",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "build": "cd backend && npm install && cd ../frontend && npm install && npm run build",
+    "dev": "cd backend && npm run dev"
+  }
+}
