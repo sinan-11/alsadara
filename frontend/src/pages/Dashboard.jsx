@@ -92,7 +92,13 @@ const Dashboard = () => {
                     <p className="text-sm font-semibold text-gray-800 truncate">
                       {mobile.brand} {mobile.model}
                     </p>
-                    <p className="text-xs font-mono text-gray-400 truncate">{mobile.imei1}</p>
+                    <p className="text-xs font-mono text-gray-400 truncate">
+                      {mobile.hasImei === false ? (
+                        <span className="font-sans text-gray-400 italic">No IMEI</span>
+                      ) : (
+                        mobile.imei1
+                      )}
+                    </p>
                   </div>
                 </div>
                 <span className={`flex-shrink-0 px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wide ${

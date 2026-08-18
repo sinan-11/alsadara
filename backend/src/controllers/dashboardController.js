@@ -4,7 +4,7 @@ exports.getStats = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const query = { user: userId };
-    const listFields = 'imei1 brand model status';
+    const listFields = 'hasImei imei1 brand model status';
 
     const [statsResult, recentMobiles] = await Promise.all([
       Mobile.aggregate([

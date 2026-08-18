@@ -9,8 +9,10 @@ const AddStock = () => {
   const [imei1, setImei1] = useState('');
   const [imei2, setImei2] = useState('');
   const [key, setKey] = useState(0);
+  const [hasImei, setHasImei] = useState(true);
   const [formData, setFormData] = useState({
     brand: '', model: '', ram: '', storage: '', color: '',
+    purchasePrice: '', sellingPrice: '',
   });
 
   const handleChange = (e) => {
@@ -19,13 +21,29 @@ const AddStock = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!imei1 || imei1.length !== 15) {
-      toast.error('IMEI 1 must be 15 digits');
-      return;
+    if (hasImei) {
+      if (!imei1 || imei1.length !== 15) {
+        toast.error('IMEI 1 must be 15 digits');
+        return;
+      }
     }
     setLoading(true);
     try {
-      await mobileAPI.addMobile({ imei1, imei2: imei2 || undefined, ...formData });
+      const payload = {
+        hasImei,
+        brand: formData.brand,
+        model: formData.model,
+        ram: formData.ram,
+        storage: formData.storage,
+        color: formData.color,
+        purchasePrice: formData.purchasePrice ? Number(formData.purchasePrice) : 0,
+        sellingPrice: formData.sellingPrice ? Number(formData.sellingPrice) : 0,
+      };
+      if (hasImei) {
+        payload.imei1 = imei1;
+        payload.imei2 = imei2 || undefined;
+      }
+      await mobileAPI.addMobile(payload);
       toast.success('Mobile added');
       resetForm();
     } catch (error) {
@@ -38,7 +56,10 @@ const AddStock = () => {
   const resetForm = () => {
     setImei1('');
     setImei2('');
-    setFormData({ brand: '', model: '', ram: '', storage: '', color: '' });
+    setFormData({
+      brand: '', model: '', ram: '', storage: '', color: '',
+      purchasePrice: '', sellingPrice: '',
+    });
     setKey((k) => k + 1);
   };
 
@@ -52,29 +73,54 @@ const AddStock = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* IMEI Section */}
         <div className="card">
-          <p className="section-title">IMEI</p>
-          <div className="space-y-3">
-            <ImeiInput
-              key={`imei1-${key}`}
-              value={imei1}
-              onChange={setImei1}
-              label="IMEI 1 *"
-              placeholder=""
-              autoFocus
-            />
-            <ImeiInput
-              key={`imei2-${key}`}
-              value={imei2}
-              onChange={setImei2}
-              label="IMEI 2"
-              placeholder=""
-            />
+          <div className="flex items-center justify-between mb-3">
+            <p className="section-title mb-0">IMEI</p>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <span className="text-xs font-semibold text-gray-500">No IMEI (Tab)</span>
+              <button
+                type="button"
+                onClick={() => setHasImei((v) => !v)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  hasImei ? 'bg-indigo-600' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    hasImei ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </label>
           </div>
+          {hasImei && (
+            <div className="space-y-3">
+              <ImeiInput
+                key={`imei1-${key}`}
+                value={imei1}
+                onChange={setImei1}
+                label="IMEI 1 *"
+                placeholder=""
+                autoFocus
+              />
+              <ImeiInput
+                key={`imei2-${key}`}
+                value={imei2}
+                onChange={setImei2}
+                label="IMEI 2"
+                placeholder=""
+              />
+            </div>
+          )}
+          {!hasImei && (
+            <p className="text-xs text-gray-400 bg-gray-50 rounded-xl p-3 text-center">
+              IMEI fields are hidden for items without IMEI (tabs, accessories, etc.)
+            </p>
+          )}
         </div>
 
         {/* Details */}
         <div className="card">
-          <p className="section-title">Phone Details</p>
+          <p className="section-title">Details</p>
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">Brand *</label>
@@ -139,6 +185,39 @@ const AddStock = () => {
                   className="input-field"
                 />
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Pricing */}
+        <div className="card">
+          <p className="section-title">Pricing</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5">Purchase Price</label>
+              <input
+                type="number"
+                name="purchasePrice"
+                value={formData.purchasePrice}
+                onChange={handleChange}
+                min="0"
+                autoComplete="off"
+                placeholder="0"
+                className="input-field"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5">Selling Price *</label>
+              <input
+                type="number"
+                name="sellingPrice"
+                value={formData.sellingPrice}
+                onChange={handleChange}
+                min="0"
+                autoComplete="off"
+                placeholder="0"
+                className="input-field"
+              />
             </div>
           </div>
         </div>

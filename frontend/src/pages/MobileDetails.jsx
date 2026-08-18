@@ -72,18 +72,24 @@ const MobileDetails = () => {
       {/* IMEI card */}
       <div className="card mb-4">
         <p className="section-title">IMEI</p>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-            <span className="text-xs font-semibold text-gray-400">IMEI 1</span>
-            <span className="text-sm font-mono font-semibold text-gray-800">{mobile.imei1}</span>
+        {mobile.hasImei === false ? (
+          <div className="p-3 bg-gray-50 rounded-xl text-center">
+            <span className="text-sm text-gray-400 italic">No IMEI - Item without IMEI</span>
           </div>
-          {mobile.imei2 && (
+        ) : (
+          <div className="space-y-2">
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-              <span className="text-xs font-semibold text-gray-400">IMEI 2</span>
-              <span className="text-sm font-mono font-semibold text-gray-800">{mobile.imei2}</span>
+              <span className="text-xs font-semibold text-gray-400">IMEI 1</span>
+              <span className="text-sm font-mono font-semibold text-gray-800">{mobile.imei1}</span>
             </div>
-          )}
-        </div>
+            {mobile.imei2 && (
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <span className="text-xs font-semibold text-gray-400">IMEI 2</span>
+                <span className="text-sm font-mono font-semibold text-gray-800">{mobile.imei2}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Details card */}
@@ -96,11 +102,13 @@ const MobileDetails = () => {
             { label: 'RAM', value: mobile.ram },
             { label: 'Storage', value: mobile.storage },
             { label: 'Color', value: mobile.color },
+            { label: 'Purchase Price', value: mobile.purchasePrice > 0 ? `₹${mobile.purchasePrice.toLocaleString('en-IN')}` : null },
+            { label: 'Selling Price', value: mobile.sellingPrice > 0 ? `₹${mobile.sellingPrice.toLocaleString('en-IN')}` : null },
             { label: 'Added', value: formatDate(mobile.createdAt) },
           ].filter((r) => r.value).map((row) => (
             <div key={row.label} className="flex items-center justify-between py-2">
               <span className="text-xs font-semibold text-gray-400">{row.label}</span>
-              <span className="text-sm font-medium text-gray-700">{row.value}</span>
+              <span className={`text-sm font-medium ${row.label === 'Selling Price' ? 'text-indigo-600 font-bold' : 'text-gray-700'}`}>{row.value}</span>
             </div>
           ))}
         </div>

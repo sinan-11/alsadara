@@ -103,8 +103,8 @@ function drawTableRow(doc, mobile, rowNum, y) {
 
   const values = [
     String(rowNum),
-    mobile.imei1 || '-',
-    mobile.imei2 || '-',
+    mobile.hasImei === false ? 'No IMEI' : (mobile.imei1 || '-'),
+    mobile.hasImei === false ? '-' : (mobile.imei2 || '-'),
     mobile.brand || '-',
     mobile.model || '-',
     mobile.ram || '-',

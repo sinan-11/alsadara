@@ -8,10 +8,14 @@ const mobileSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    hasImei: {
+      type: Boolean,
+      default: true,
+    },
     imei1: {
       type: String,
-      required: [true, 'IMEI 1 is required'],
       trim: true,
+      default: null,
     },
     imei2: {
       type: String,
@@ -67,7 +71,7 @@ const mobileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-mobileSchema.index({ user: 1, imei1: 1 }, { unique: true });
+mobileSchema.index({ user: 1, imei1: 1 }, { unique: true, partialFilterExpression: { imei1: { $type: 'string' } } });
 mobileSchema.index({ user: 1, imei2: 1 }, { unique: true, partialFilterExpression: { imei2: { $type: 'string' } } });
 mobileSchema.index({ user: 1, brand: 1 });
 mobileSchema.index({ user: 1, model: 1 });

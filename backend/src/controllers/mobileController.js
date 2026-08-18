@@ -2,47 +2,58 @@ const Mobile = require('../models/Mobile');
 const { validateIMEI } = require('../utils/imeiValidator');
 const { generatePDF } = require('../utils/pdfGenerator');
 
-const LIST_FIELDS = 'imei1 imei2 brand model ram storage color status createdAt';
+const LIST_FIELDS = 'hasImei imei1 imei2 brand model ram storage color purchasePrice sellingPrice status createdAt';
 
 exports.addMobile = async (req, res, next) => {
   try {
-    const { imei1, imei2, brand, model, ram, storage, color } = req.body;
+    const { imei1, imei2, brand, model, ram, storage, color, hasImei = true, purchasePrice, sellingPrice } = req.body;
 
-    const imei1Validation = validateIMEI(imei1);
-    if (!imei1Validation.valid) {
-      return res.status(400).json({ success: false, message: `IMEI 1: ${imei1Validation.message}` });
-    }
+    let cleanedImei1 = null;
+    let cleanedImei2 = null;
 
-    if (imei2) {
-      const imei2Validation = validateIMEI(imei2);
-      if (!imei2Validation.valid) {
-        return res.status(400).json({ success: false, message: `IMEI 2: ${imei2Validation.message}` });
+    if (hasImei) {
+      const imei1Validation = validateIMEI(imei1);
+      if (!imei1Validation.valid) {
+        return res.status(400).json({ success: false, message: `IMEI 1: ${imei1Validation.message}` });
       }
-      if (imei1Validation.cleaned === imei2Validation.cleaned) {
-        return res.status(400).json({ success: false, message: 'IMEI 1 and IMEI 2 must be different.' });
+
+      if (imei2) {
+        const imei2Validation = validateIMEI(imei2);
+        if (!imei2Validation.valid) {
+          return res.status(400).json({ success: false, message: `IMEI 2: ${imei2Validation.message}` });
+        }
+        if (imei1Validation.cleaned === imei2Validation.cleaned) {
+          return res.status(400).json({ success: false, message: 'IMEI 1 and IMEI 2 must be different.' });
+        }
       }
-    }
 
-    const userId = req.user._id;
+      const userId = req.user._id;
 
-    const [existingImei1, existingImei2] = await Promise.all([
-      Mobile.findOne({ user: userId, imei1: imei1Validation.cleaned }).lean(),
-      imei2 ? Mobile.findOne({ user: userId, imei2: imei2.trim() }).lean() : null,
-    ]);
+      const [existingImei1, existingImei2] = await Promise.all([
+        Mobile.findOne({ user: userId, imei1: imei1Validation.cleaned }).lean(),
+        imei2 ? Mobile.findOne({ user: userId, imei2: imei2.trim() }).lean() : null,
+      ]);
 
-    if (existingImei1) {
-      return res.status(409).json({ success: false, message: 'This IMEI 1 already exists.' });
-    }
-    if (existingImei2) {
-      return res.status(409).json({ success: false, message: 'This IMEI 2 already exists.' });
+      if (existingImei1) {
+        return res.status(409).json({ success: false, message: 'This IMEI 1 already exists.' });
+      }
+      if (existingImei2) {
+        return res.status(409).json({ success: false, message: 'This IMEI 2 already exists.' });
+      }
+
+      cleanedImei1 = imei1Validation.cleaned;
+      cleanedImei2 = imei2 ? imei2.trim() : null;
     }
 
     const mobile = await Mobile.create({
-      user: userId,
-      imei1: imei1Validation.cleaned,
-      imei2: imei2 ? imei2.trim() : null,
+      user: req.user._id,
+      hasImei,
+      imei1: cleanedImei1,
+      imei2: cleanedImei2,
       brand, model,
       ram: ram || '', storage: storage || '', color: color || '',
+      purchasePrice: purchasePrice || 0,
+      sellingPrice: sellingPrice || 0,
     });
 
     res.status(201).json({ success: true, message: 'Mobile added successfully.', data: { mobile } });
@@ -203,42 +214,51 @@ exports.updateMobile = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Mobile not found.' });
     }
 
-    const { imei1, imei2, brand, model, ram, storage, color, status } = req.body;
+    const { imei1, imei2, brand, model, ram, storage, color, status, hasImei, purchasePrice, sellingPrice } = req.body;
     const userId = req.user._id;
 
-    if (imei1 !== undefined) {
-      const imei1Validation = validateIMEI(imei1);
-      if (!imei1Validation.valid) {
-        return res.status(400).json({ success: false, message: `IMEI 1: ${imei1Validation.message}` });
-      }
-      if (imei1Validation.cleaned !== mobile.imei1) {
-        const existing = await Mobile.findOne({ user: userId, imei1: imei1Validation.cleaned }).lean();
-        if (existing) {
-          return res.status(409).json({ success: false, message: 'This IMEI 1 already exists.' });
-        }
-      }
-      mobile.imei1 = imei1Validation.cleaned;
-    }
+    if (hasImei !== undefined) mobile.hasImei = hasImei;
 
-    if (imei2 !== undefined) {
-      if (imei2 === '' || imei2 === null) {
-        mobile.imei2 = null;
-      } else {
-        const imei2Validation = validateIMEI(imei2);
-        if (!imei2Validation.valid) {
-          return res.status(400).json({ success: false, message: `IMEI 2: ${imei2Validation.message}` });
+    const currentHasImei = mobile.hasImei;
+
+    if (currentHasImei) {
+      if (imei1 !== undefined) {
+        const imei1Validation = validateIMEI(imei1);
+        if (!imei1Validation.valid) {
+          return res.status(400).json({ success: false, message: `IMEI 1: ${imei1Validation.message}` });
         }
-        if (imei2Validation.cleaned === mobile.imei1) {
-          return res.status(400).json({ success: false, message: 'IMEI 1 and IMEI 2 must be different.' });
-        }
-        if (imei2Validation.cleaned !== mobile.imei2) {
-          const existing = await Mobile.findOne({ user: userId, imei2: imei2Validation.cleaned }).lean();
+        if (imei1Validation.cleaned !== mobile.imei1) {
+          const existing = await Mobile.findOne({ user: userId, imei1: imei1Validation.cleaned }).lean();
           if (existing) {
-            return res.status(409).json({ success: false, message: 'This IMEI 2 already exists.' });
+            return res.status(409).json({ success: false, message: 'This IMEI 1 already exists.' });
           }
         }
-        mobile.imei2 = imei2Validation.cleaned;
+        mobile.imei1 = imei1Validation.cleaned;
       }
+
+      if (imei2 !== undefined) {
+        if (imei2 === '' || imei2 === null) {
+          mobile.imei2 = null;
+        } else {
+          const imei2Validation = validateIMEI(imei2);
+          if (!imei2Validation.valid) {
+            return res.status(400).json({ success: false, message: `IMEI 2: ${imei2Validation.message}` });
+          }
+          if (imei2Validation.cleaned === mobile.imei1) {
+            return res.status(400).json({ success: false, message: 'IMEI 1 and IMEI 2 must be different.' });
+          }
+          if (imei2Validation.cleaned !== mobile.imei2) {
+            const existing = await Mobile.findOne({ user: userId, imei2: imei2Validation.cleaned }).lean();
+            if (existing) {
+              return res.status(409).json({ success: false, message: 'This IMEI 2 already exists.' });
+            }
+          }
+          mobile.imei2 = imei2Validation.cleaned;
+        }
+      }
+    } else {
+      mobile.imei1 = null;
+      mobile.imei2 = null;
     }
 
     if (brand !== undefined) mobile.brand = brand;
@@ -247,6 +267,8 @@ exports.updateMobile = async (req, res, next) => {
     if (storage !== undefined) mobile.storage = storage;
     if (color !== undefined) mobile.color = color;
     if (status !== undefined) mobile.status = status;
+    if (purchasePrice !== undefined) mobile.purchasePrice = purchasePrice;
+    if (sellingPrice !== undefined) mobile.sellingPrice = sellingPrice;
 
     await mobile.save();
 

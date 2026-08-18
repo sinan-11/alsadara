@@ -173,8 +173,19 @@ const Stock = () => {
                     <p className="text-sm font-semibold text-gray-800 truncate">
                       {mobile.brand} {mobile.model}
                     </p>
-                    <p className="text-xs font-mono text-gray-400 truncate">{mobile.imei1}</p>
+                    <p className="text-xs font-mono text-gray-400 truncate">
+                      {mobile.hasImei === false ? (
+                        <span className="font-sans text-gray-400 italic">No IMEI</span>
+                      ) : (
+                        mobile.imei1
+                      )}
+                    </p>
                     <div className="flex items-center gap-2 mt-1">
+                      {mobile.sellingPrice > 0 && (
+                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md">
+                          ₹{mobile.sellingPrice.toLocaleString('en-IN')}
+                        </span>
+                      )}
                       {mobile.storage && (
                         <span className="text-[10px] font-semibold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md">
                           {mobile.storage}

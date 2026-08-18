@@ -13,8 +13,10 @@ const EditMobile = () => {
   const [saving, setSaving] = useState(false);
   const [imei1, setImei1] = useState('');
   const [imei2, setImei2] = useState('');
+  const [hasImei, setHasImei] = useState(true);
   const [formData, setFormData] = useState({
     brand: '', model: '', ram: '', storage: '', color: '', status: 'AVAILABLE',
+    purchasePrice: '', sellingPrice: '',
   });
 
   useEffect(() => { fetchMobile(); }, [id]);
@@ -23,11 +25,14 @@ const EditMobile = () => {
     try {
       const { data } = await mobileAPI.getMobileById(id);
       const m = data.data.mobile;
-      setImei1(m.imei1);
+      setHasImei(m.hasImei !== false);
+      setImei1(m.imei1 || '');
       setImei2(m.imei2 || '');
       setFormData({
         brand: m.brand, model: m.model, ram: m.ram || '',
         storage: m.storage || '', color: m.color || '', status: m.status,
+        purchasePrice: m.purchasePrice || '',
+        sellingPrice: m.sellingPrice || '',
       });
     } catch {
       toast.error('Mobile not found');
@@ -41,13 +46,30 @@ const EditMobile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!imei1 || imei1.length !== 15) {
-      toast.error('IMEI 1 must be 15 digits');
-      return;
+    if (hasImei) {
+      if (!imei1 || imei1.length !== 15) {
+        toast.error('IMEI 1 must be 15 digits');
+        return;
+      }
     }
     setSaving(true);
     try {
-      await mobileAPI.updateMobile(id, { imei1, imei2: imei2 || undefined, ...formData });
+      const payload = {
+        hasImei,
+        brand: formData.brand,
+        model: formData.model,
+        ram: formData.ram,
+        storage: formData.storage,
+        color: formData.color,
+        status: formData.status,
+        purchasePrice: formData.purchasePrice ? Number(formData.purchasePrice) : 0,
+        sellingPrice: formData.sellingPrice ? Number(formData.sellingPrice) : 0,
+      };
+      if (hasImei) {
+        payload.imei1 = imei1;
+        payload.imei2 = imei2 || undefined;
+      }
+      await mobileAPI.updateMobile(id, payload);
       toast.success('Updated');
       navigate(`/stock/${id}`);
     } catch (error) {
@@ -67,11 +89,36 @@ const EditMobile = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="card">
-          <p className="section-title">IMEI</p>
-          <div className="space-y-3">
-            <ImeiInput value={imei1} onChange={setImei1} label="IMEI 1 *" />
-            <ImeiInput value={imei2} onChange={setImei2} label="IMEI 2" />
+          <div className="flex items-center justify-between mb-3">
+            <p className="section-title mb-0">IMEI</p>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <span className="text-xs font-semibold text-gray-500">No IMEI (Tab)</span>
+              <button
+                type="button"
+                onClick={() => setHasImei((v) => !v)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  hasImei ? 'bg-indigo-600' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    hasImei ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </label>
           </div>
+          {hasImei && (
+            <div className="space-y-3">
+              <ImeiInput value={imei1} onChange={setImei1} label="IMEI 1 *" />
+              <ImeiInput value={imei2} onChange={setImei2} label="IMEI 2" />
+            </div>
+          )}
+          {!hasImei && (
+            <p className="text-xs text-gray-400 bg-gray-50 rounded-xl p-3 text-center">
+              IMEI fields are hidden for items without IMEI (tabs, accessories, etc.)
+            </p>
+          )}
         </div>
 
         <div className="card">
@@ -105,6 +152,20 @@ const EditMobile = () => {
                 <option value="AVAILABLE">Available</option>
                 <option value="SOLD">Sold</option>
               </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <p className="section-title">Pricing</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5">Purchase Price</label>
+              <input type="number" name="purchasePrice" value={formData.purchasePrice} onChange={handleChange} min="0" autoComplete="off" placeholder="0" className="input-field" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5">Selling Price</label>
+              <input type="number" name="sellingPrice" value={formData.sellingPrice} onChange={handleChange} min="0" autoComplete="off" placeholder="0" className="input-field" />
             </div>
           </div>
         </div>
